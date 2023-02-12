@@ -1,12 +1,19 @@
+//Eris is a node.js library used to create Discord bots
 const Eris = require('eris');
+//add the OpenAI API functionality
 const { Configuration, OpenAIApi } = require('openai');
+//initalize the accompanying database using sqlite3
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('bot.db');
+//used to create a quasi-table as Discord lacks such functionality
 const { Table } = require ('embed-table');
+//general Discord.JS Functionality
 const { EmbedBuilder } = require ('discord.js');
 const { Client, GatewayIntentBits } = require('discord.js');
+//this is required to load variables from the .env file such as our API Keys
 require('dotenv').config()
 
+//initalize the OpenAI API using my API Key
 const configuration = new Configuration({
     apiKey: process.env.OPENAI_API_KEY,
 });
@@ -23,6 +30,7 @@ const client = new Client({
 
 //Connect to both Eris and Discord.js using the tokens saved in our .env file
 const openai = new OpenAIApi(configuration);
+//Discord Bot Token is obtained after creating/registering my bot with Discord
 const bot = new Eris(process.env.DISCORD_BOT_TOKEN);
 client.login(process.env.DISCORD_BOT_TOKEN);
 
