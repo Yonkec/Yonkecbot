@@ -78,14 +78,17 @@ function sleep(ms) {
 
 //Accepts a winner, loser, and processed DB queries to record the results / notify the channel of the outcome
 function setWinnerLoser(winner, loser, msg){
+    //first query checks to see if the user exists in the Db, if not we add them with 0 win/losses
     db.run('INSERT OR IGNORE INTO leetroll (id, wins, losses) VALUES (?, 0, 0)', winner.id);
+    //update the winners W/L record
     db.run('UPDATE leetroll SET wins = wins + 1 WHERE id = ?', winner.id);
 
+    //same deal here we check to see if the loser already exists in the DB, and if not we add them to it
     db.run('INSERT OR IGNORE INTO leetroll (id, wins, losses) VALUES (?, 0, 0)', loser.id);
     db.run('UPDATE leetroll SET losses = losses + 1 WHERE id = ?', loser.id);
 
     winnername = winner.nickname || winner.user.username;
-    
+    //the <@ functionality is used to create an @mention of the user, that is esssentially just <@DiscordUserID>
     bot.createMessage(msg.channel.id, "<@" + loser.id + "> rolled a zero, has been vanquished, and thus must now offer tribute to " + winnername + ".");
 }
 //Game that requires a lowerbound, upperbound, and user being challenged in format "$random lower upper @user"
@@ -182,18 +185,27 @@ client.on("error", (err) => {
 //if so we execute the related code
 bot.on("messageCreate", async (msg) => {
     if(msg.content.startsWith("#")) {
+        //this calls our function, passing it the message entered by the user
+        //the .substring(1) call strips the first character from the string, returning everything else
+        //.then() is used to handle the promise of the async runCompletion function
+        //we then pass that eventual result over into the bot.createMessage function
+        //that function identifies the current channel by checking to see which channel the trigger message arose from
+        //and passes the "prmosied" result into a new Bot Message we see in discord
         runCompletion(msg.content.substring(1)).then(result => bot.createMessage(msg.channel.id, result));
     } 
     else if(msg.content.startsWith("&")) {
+        //same thing here we just receive an image URL instead of a text chat
         imageCompletion(msg.content.substring(1)).then(result => bot.createMessage(msg.channel.id, result));
     } 
     else if (msg.content.startsWith("$random")) {
+        //calls our autoLeet function, only passing in the original message
+        //everything else is done function-side
         autoLeet(msg);
     }
     else if (msg.content.startsWith("$top")) {
         
         const guild = await client.guilds.fetch(msg.guildID).catch(() => null);
-
+        //queries the DB to pull all entries from leetroll, ordering them such that the leaderboard is ranked by wins
         db.all('SELECT * FROM leetroll ORDER BY wins DESC', async (err, rows) => {
             if (err) {
                 console.error(err);
@@ -207,6 +219,9 @@ bot.on("messageCreate", async (msg) => {
         //if we add new columns we will then need to re-align everything
         
         //IF any value exceeds the size of the column in this fixed width notation it will crash the API
+        //the Indexes are determining where each column begins and ends so the 1st column is 89? characters wide
+        //the second one is 18? etc.  padEnd adds a few extra characters to the end to make it look better
+        //the start and end character is a backtick used to improve visuals per Discords shitty formatting
         const table = new Table({
             titles: ['Name', 'Wins', 'Losses'],
             titleIndexes: [0, 90, 108],
@@ -224,6 +239,7 @@ bot.on("messageCreate", async (msg) => {
             const name = member.nickname || member.user.username;
 
             //add a new row to Table using the current row from our Db Query
+            //Important to note this can only accept string values
             table.addRow([
                 name, 
                 row['wins'].toString(), 
