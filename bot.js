@@ -108,39 +108,59 @@ function setWinnerLoser(winner, loser, msg){
 
     db.run('INSERT OR IGNORE INTO leetroll (id, wins, losses) VALUES (?, 0, 0)', loser.id);
     db.run('UPDATE leetroll SET losses = losses + 1 WHERE id = ?', loser.id);
+
+    winnername = winner.nickname || winner.user.username;
     
-    bot.createMessage(msg.channel.id, "<@" + loser.id + "> rolled a zero, has been vanquished, and thus must now offer tribute to " + winner.username + ".");
+    bot.createMessage(msg.channel.id, "<@" + loser.id + "> rolled a zero, has been vanquished, and thus must now offer tribute to " + winnername + ".");
 }
 
 async function autoLeet (msg) {
 
+    const guild = await client.guilds.fetch(msg.guildID).catch(() => null);
     var args = msg.content.split(" ");
     var lowerBound = parseInt(args[1]);
     var upperBound = parseInt(args[2]);
     var upper = upperBound;
     var mentioned = args[3];
+    
+    const member1 = await guild.members.fetch(msg.author.id).catch(() => null);
+    const member2 = await guild.members.fetch(mentioned.replace(/[<@!>]/g, "")).catch(() => null);
 
-    const player1 = bot.users.get(msg.author.id);
-    const player2 = bot.users.get(mentioned.replace(/[<@!>]/g, ""));
+    if (!member1 || !member2) {
+        bot.createMessage(msg.channel.id, "Please challenge a valid opponent.");
+        return;
+    }
 
-    if (!player1 || !player2 || player1.bot || player2.bot){
+    const player1 = member1.nickname || member1.user.username;
+    const player2 = member2.nickname || member2.user.username;
+
+    // const player1 = bot.users.get(msg.author.id);
+    // const player2 = bot.users.get(mentioned.replace(/[<@!>]/g, ""));
+
+    if (player1.bot || player2.bot){
         bot.createMessage(msg.channel.id, "Sorry - bots are statutorily restricted from participating in this activity.");
         return;
     }
+    const rollmsg = ["Initiating the Leet Roll....", "\n"];
+    botmsg = await bot.createMessage(msg.channel.id, rollmsg.join(""));
 
     do{
         var result = leetRoll(lowerBound,upper);
         //console.log("l:" + lower + " || u:" + upper + " || r:" + result);
-        bot.createMessage(msg.channel.id, "<@" + (onesTurn ? player1.id : player2.id) + "> rolled: " + result);
+
+        rollmsg.splice(-1, 0, '\n', (onesTurn ? player1 : player2) + " rolled: " + result);
+        await botmsg.edit(rollmsg.join(""));
+
         upper = result;
         onesTurn = !onesTurn;
-        await sleep(1000);
+        await sleep(1500);
+
     } while (result != lowerBound)
 
     if (onesTurn) {
-        setWinnerLoser(player1, player2, msg);
+        setWinnerLoser(member1, member2, msg);
     }else{
-        setWinnerLoser(player2, player1, msg);
+        setWinnerLoser(member2, member1, msg);
     }
 }
 
