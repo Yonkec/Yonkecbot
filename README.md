@@ -1,6 +1,4 @@
-# YonkecBot
-#### Video Demo:  (https://youtu.be/JN0r2QvZCWY)
-#### Description:
+
 
 Discord Bot that currently has 4 functions:
 
