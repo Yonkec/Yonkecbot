@@ -205,6 +205,7 @@ bot.on("messageCreate", async (msg) => {
     else if (msg.content.startsWith("$top")) {
         
         const guild = await client.guilds.fetch(msg.guildID).catch(() => null);
+
         //queries the DB to pull all entries from leetroll, ordering them such that the leaderboard is ranked by wins
         db.all('SELECT * FROM leetroll ORDER BY wins DESC', async (err, rows) => {
             if (err) {
@@ -236,7 +237,19 @@ bot.on("messageCreate", async (msg) => {
 
             //look back up the relevant username from our DB's userID
             const member = await guild.members.fetch(row['id']).catch(() => null);
-            const name = member.nickname || member.user.username;
+            var user = null;
+            var name = null;
+
+            //added this because if any user in the leaderboard is not present in the current channel
+            //we can't perform a guild(channel) lookup and instead must do a generic lookup
+            //The reason we do a guild lookup is to allow for referencing their current Nickname
+            //of the channel, otherwise we might be pulling their Username which is different
+            if (member != null) {
+                name = member.nickname || member.user.username;
+            } else {
+                user = await client.users.fetch(row['id']).catch(() => null);
+                name = user.username;
+            }            
 
             //add a new row to Table using the current row from our Db Query
             //Important to note this can only accept string values
