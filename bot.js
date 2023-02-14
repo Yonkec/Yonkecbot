@@ -12,6 +12,9 @@ const { EmbedBuilder } = require ('discord.js');
 const { Client, GatewayIntentBits } = require('discord.js');
 //this is required to load variables from the .env file such as our API Keys
 require('dotenv').config()
+//Used to generate more-better random numbers (hopefully)
+const crypto = require('crypto');
+
 
 //initalize the OpenAI API using my API Key
 const configuration = new Configuration({
@@ -67,8 +70,16 @@ async function imageCompletion (message) {
 }
 
 //Generates a random value within a given range, inclusive
-function leetRoll(lower, upper) {
-    return value = Math.floor(Math.random() * (upper - lower + 1)) + lower;
+function leetRoll(min, max) {
+    //old approach that sucked and was suspiciously violating statistical probabilities
+    //return value = Math.floor(Math.random() * (upper - lower + 1)) + lower;
+
+    const range = max - min + 1;
+    const bytesNeeded = Math.ceil(Math.log2(range) / 8);
+    const randomBytes = crypto.randomBytes(bytesNeeded);
+    const randomValue = randomBytes.readUIntBE(0, bytesNeeded);
+    const result = min + (randomValue % range);
+    return result;
 }
 
 //Sleeps the current execution for the indicated number of ms.
@@ -184,6 +195,7 @@ client.on("error", (err) => {
 //this message is then parsed to check to see if it contains any of the indicated commands
 //if so we execute the related code
 bot.on("messageCreate", async (msg) => {
+
     if(msg.content.startsWith("#")) {
         //this calls our function, passing it the message entered by the user
         //the .substring(1) call strips the first character from the string, returning everything else
@@ -193,15 +205,18 @@ bot.on("messageCreate", async (msg) => {
         //and passes the "prmosied" result into a new Bot Message we see in discord
         runCompletion(msg.content.substring(1)).then(result => bot.createMessage(msg.channel.id, result));
     } 
+
     else if(msg.content.startsWith("&")) {
         //same thing here we just receive an image URL instead of a text chat
         imageCompletion(msg.content.substring(1)).then(result => bot.createMessage(msg.channel.id, result));
     } 
+
     else if (msg.content.startsWith("$random")) {
         //calls our autoLeet function, only passing in the original message
         //everything else is done function-side
         autoLeet(msg);
     }
+    
     else if (msg.content.startsWith("$top")) {
         
         const guild = await client.guilds.fetch(msg.guildID).catch(() => null);
