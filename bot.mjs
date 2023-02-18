@@ -5,8 +5,8 @@ import Eris from 'eris';
 import { Configuration, OpenAIApi } from 'openai';
 import sqlite3 from 'sqlite3';
 const db = new sqlite3.Database('bot.db');
-
 import { Client, GatewayIntentBits } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 
 import dotenv from 'dotenv';
 dotenv.config({ path: './.env' });
@@ -26,63 +26,130 @@ const client = new Client({
     ]   
 });
 
-//Connect to both Eris and Discord.js using the tokens saved in our .env file
 const openai = new OpenAIApi(configuration);
-//Discord Bot Token is obtained after creating/registering my bot with Discord
 const bot = new Eris(process.env.DISCORD_BOT_TOKEN);
 client.login(process.env.DISCORD_BOT_TOKEN);
 
 
-//Indicates when Eris is ready to accept input
 bot.on("ready", () => { 
     console.log("Eris is connected and ready!"); 
 });
 
-//Indicates when Discord.Js is ready to accept input
 client.on("ready", () => { 
     console.log("Discord.js is connected and ready!"); 
 });
 
-//Alerts if Eris failed to initialize / encountered an error
 bot.on("error", (err) => {
   console.error(err); 
 });
 
-//Alerts if Discord.js failed to initalize or encountered an error
 client.on("error", (err) => {
     console.error(err); 
   });
 
-//messageCreate is called when a user creates a message in one of the bots active channels
-//this message is then parsed to check to see if it contains any of the indicated commands
-//if so we execute the related code
+
 bot.on("messageCreate", async (msg) => {
 
     if(msg.content.startsWith("#")) {
-        //this calls our function, passing it the message entered by the user
-        //the .substring(1) call strips the first character from the string, returning everything else
-        //.then() is used to handle the promise of the async runCompletion function
-        //we then pass that eventual result over into the bot.createMessage function
-        //that function identifies the current channel by checking to see which channel the trigger message arose from
-        //and passes the "prmosied" result into a new Bot Message we see in discord
         ai.runCompletion(msg.content.substring(1), openai).then(result => bot.createMessage(msg.channel.id, result));
     } 
 
     else if(msg.content.startsWith("&")) {
-        //same thing here we just receive an image URL instead of a text chat
         ai.imageCompletion(msg.content.substring(1), openai).then(result => bot.createMessage(msg.channel.id, result));
     } 
 
     else if (msg.content.startsWith("$random")) {
-        //calls our autoLeet function, only passing in the original message
-        //everything else is done function-side
         leet.autoLeet(msg, client, db, bot);
     }
     
     else if (msg.content.startsWith("$top")) {
         leet.leetTop(msg, client, db, bot);
     }  
+    else if (msg.content.startsWith("!embed")) {
+
+        try {
+            const embed = new EmbedBuilder()
+            .setColor(0x0099FF)
+            .setTitle('Some title')
+            .setURL('https://discord.js.org/')
+            .setAuthor({ name: 'Some name', iconURL: 'https://i.imgur.com/AfFp7pu.png', url: 'https://discord.js.org' })
+            .setDescription('Some description here')
+            .setThumbnail('https://i.imgur.com/AfFp7pu.png')
+            .addFields(
+                { name: 'Regular field title', value: 'Some value here' },
+                { name: '\u200B', value: '\u200B' },
+                { name: 'Inline field title', value: 'Some value here', inline: true },
+                { name: 'Inline field title', value: 'Some value here', inline: true },
+            )
+            .addFields({ name: 'Inline field title', value: 'Some value here', inline: true })
+            .setImage('https://i.imgur.com/AfFp7pu.png')
+            .setTimestamp()
+            .setFooter({ text: 'Some footer text here', iconURL: 'https://i.imgur.com/AfFp7pu.png' });
+
+        bot.createMessage(msg.channel.id, {embed: embed});
+        } catch (error){
+            console.log(error);
+        };
+
+    }  
+    else if (msg.content.startsWith("!embed2")) {
+
+        try {
+            const exampleEmbed = {
+                color: 0x0099ff,
+                title: 'Some title',
+                url: 'https://discord.js.org',
+                author: {
+                    name: 'Some name',
+                    icon_url: 'https://i.imgur.com/AfFp7pu.png',
+                    url: 'https://discord.js.org',
+                },
+                description: 'Some description here',
+                thumbnail: {
+                    url: 'https://i.imgur.com/AfFp7pu.png',
+                },
+                fields: [
+                    {
+                        name: 'Regular field title',
+                        value: 'Some value here',
+                    },
+                    {
+                        name: '\u200b',
+                        value: '\u200b',
+                        inline: false,
+                    },
+                    {
+                        name: 'Inline field title',
+                        value: 'Some value here',
+                        inline: true,
+                    },
+                    {
+                        name: 'Inline field title',
+                        value: 'Some value here',
+                        inline: true,
+                    },
+                    {
+                        name: 'Inline field title',
+                        value: 'Some value here',
+                        inline: true,
+                    },
+                ],
+                image: {
+                    url: 'https://i.imgur.com/AfFp7pu.png',
+                },
+                timestamp: new Date().toISOString(),
+                footer: {
+                    text: 'Some footer text here',
+                    icon_url: 'https://i.imgur.com/AfFp7pu.png',
+                },
+            };
+
+            bot.createMessage(msg.channel.id, {embed: embed});
+        } catch (error){
+            console.log(error);
+        };
+
+    }  
 });
 
-//tell the bot to connect itself to Discord
 bot.connect();
