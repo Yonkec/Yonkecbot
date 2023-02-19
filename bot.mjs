@@ -8,7 +8,6 @@ const db = new sqlite3.Database('bot.db');
 import { Client, GatewayIntentBits } from 'discord.js';
 import { EmbedBuilder } from 'discord.js';
 
-
 import dotenv from 'dotenv';
 dotenv.config({ path: './.env' });
 
@@ -31,9 +30,6 @@ const client = new Client({
 
 client.login(process.env.DISCORD_BOT_TOKEN);
 const bot = new Eris(process.env.DISCORD_BOT_TOKEN);
-
-
-
 
 
 bot.on("ready", () => { 

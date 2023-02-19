@@ -2,10 +2,6 @@ import * as utils from "./utils.js"
 import { Table } from 'embed-table';
 import { EmbedBuilder } from 'discord.js';
 
-import sqlite3 from 'sqlite3';
-const db = new sqlite3.Database('bot.db');
-
-
 //Accepts a winner, loser, and processed DB queries to record the results / notify the channel of the outcome
 export function setWinnerLoser(winner, loser, msg, db, bot){
     //first query checks to see if the user exists in the Db, if not we add them with 0 win/losses

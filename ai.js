@@ -1,5 +1,4 @@
 import fetch from 'node-fetch';
-import fs from "node:fs";
 import * as Discord from 'discord.js';
 
 import dotenv from 'dotenv';
@@ -9,7 +8,6 @@ const engineId = 'stable-diffusion-512-v2-1';
 const apiHost = process.env.API_HOST ?? 'https://api.stability.ai'
 const apiKey = process.env.STABILITY_API_KEY
 
-//Function to process a text completion via DaVinci
 export async function runCompletion (message, openai) {
     try {
         const completion = await openai.createCompletion({
@@ -26,7 +24,6 @@ export async function runCompletion (message, openai) {
     }
 }
 
-//Function to process an image completeion via DALL-E
 export async function imageCompletion (message, openai) {
     try {
         const completion = await openai.createImage({
@@ -43,7 +40,7 @@ export async function imageCompletion (message, openai) {
     }
 }
 
-export async function stableDiffuse(msg, client, bot) {
+export async function stableDiffuse(msg, client) {
 
     const channel = await client.channels.fetch(msg.channel.id);
 
@@ -62,12 +59,12 @@ export async function stableDiffuse(msg, client, bot) {
                         text: msg.content.substring(3)
                     }
                 ],
-                cfg_scale: 7,
-                clip_guidance_preset: 'SLOW',
+                cfg_scale: 28,
+                clip_guidance_preset: 'SIMPLE',
                 height: 512,
                 width: 512,
                 samples: 1,
-                steps: 50,
+                steps: 60,
             })
         }
     );
@@ -75,22 +72,10 @@ export async function stableDiffuse(msg, client, bot) {
     if (!response.ok) {
         throw new Error(`Non-200 response: ${await response.text()}`);
     }
-    
-    const GenerationResponse = {
-        artifacts: [
-            {
-                base64: '',
-                seed: 0,
-                finishReason: ''
-            }
-        ]
-    };
 
     const responseJSON = await response.json();
     
     responseJSON.artifacts.forEach((image, index) => {
-
-
         const buffer = new Buffer.from(image.base64, "base64");
         const file = new Discord.AttachmentBuilder(buffer, { name: 'image.png' });
 
@@ -102,6 +87,4 @@ export async function stableDiffuse(msg, client, bot) {
 
             channel.send({ embeds: [embed], files: [file] });
     });
-
-
 }
