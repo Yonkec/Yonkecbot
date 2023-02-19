@@ -1,5 +1,4 @@
 import * as utils from "./utils.js"
-import crypto  from 'crypto';
 import { Table } from 'embed-table';
 import { EmbedBuilder } from 'discord.js';
 

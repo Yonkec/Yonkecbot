@@ -1,3 +1,5 @@
+import crypto  from 'crypto';
+
 //Sleeps the current execution for the indicated number of ms.
 export function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
