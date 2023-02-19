@@ -89,10 +89,7 @@ export async function stableDiffuse(msg, client, bot) {
     const responseJSON = await response.json();
     
     responseJSON.artifacts.forEach((image, index) => {
-        // fs.writeFileSync(
-        //     `./out/v1beta_txt2img_${index}.png`,
-        //     Buffer.from(image.base64, "base64")
-        // )
+
 
         const buffer = new Buffer.from(image.base64, "base64");
         const file = new Discord.AttachmentBuilder(buffer, { name: 'image.png' });
@@ -102,8 +99,6 @@ export async function stableDiffuse(msg, client, bot) {
             .setDescription(msg.content.substring(3))
             .setImage('attachment://image.png')
             .setColor('#00ff00');
-
-            //bot.createMessage(msg.channel.id, {embed: embed}, file);
 
             channel.send({ embeds: [embed], files: [file] });
     });
