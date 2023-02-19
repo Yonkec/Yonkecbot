@@ -8,7 +8,7 @@ Discord Bot that currently has 5 functions:
 
 will query OpenAI and return a completion using DaVinci-003
 
-### **&d[text  query for Dall-E]**       
+### **&d [text  query for Dall-E]**       
 
 will query OpenAI and return an image completion via DALL-E
 
