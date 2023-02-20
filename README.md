@@ -1,16 +1,20 @@
 
 
-Discord Bot that currently has 4 functions:
+Discord Bot that currently has 5 functions:
 
 
 
-### **#[text query for OpenAI Davinci]**      
+### **# [text query for OpenAI Davinci]**      
 
 will query OpenAI and return a completion using DaVinci-003
 
-### **&[text query for Dall-E]**       
+### **&d [text  query for Dall-E]**       
 
 will query OpenAI and return an image completion via DALL-E
+
+### **&s [text query for StableDiffusion]**       
+
+will query Stability-AI and return an image completion via StableDiffusion v2.1
 
 ### **$random [lower] [upper] @user-to-challenge** 
 
