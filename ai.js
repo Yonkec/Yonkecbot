@@ -59,12 +59,12 @@ export async function stableDiffuse(msg, client) {
                         text: msg.content.substring(3)
                     }
                 ],
-                cfg_scale: 10,
+                cfg_scale: 20,
                 height: 512,
                 width: 512,
-                sampler: 'K_EULER_ANCESTRAL',
+                sampler: 'K_LMS',
                 samples: 1,
-                steps: 50,
+                steps: 100,
             })
         }
     );
