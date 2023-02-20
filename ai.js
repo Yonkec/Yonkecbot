@@ -8,11 +8,11 @@ const engineId = 'stable-diffusion-512-v2-1';
 const apiHost = process.env.API_HOST ?? 'https://api.stability.ai'
 const apiKey = process.env.STABILITY_API_KEY
 
-export async function runCompletion (message, openai) {
+export async function runCompletion (msg, openai) {
     try {
         const completion = await openai.createCompletion({
             model: "text-davinci-003",
-            prompt: message,
+            prompt: msg,
             max_tokens: 500,
         });
 
@@ -24,10 +24,10 @@ export async function runCompletion (message, openai) {
     }
 }
 
-export async function imageCompletion (message, openai) {
+export async function imageCompletion (msg, openai) {
     try {
         const completion = await openai.createImage({
-            prompt: message,
+            prompt: msg,
             n:1,
             size:'1024x1024',
         });
@@ -59,12 +59,12 @@ export async function stableDiffuse(msg, client) {
                         text: msg.content.substring(3)
                     }
                 ],
-                cfg_scale: 28,
-                clip_guidance_preset: 'SIMPLE',
+                cfg_scale: 10,
                 height: 512,
                 width: 512,
+                sampler: 'K_EULER_ANCESTRAL',
                 samples: 1,
-                steps: 60,
+                steps: 50,
             })
         }
     );
