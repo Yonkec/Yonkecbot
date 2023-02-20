@@ -1,25 +1,31 @@
 import * as leet from "./leetroll.js";
 import * as ai from "./ai.js";
 
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import Eris from 'eris';
+const bot = new Eris(process.env.DISCORD_BOT_TOKEN);
+
 import { Configuration, OpenAIApi } from 'openai';
 import sqlite3 from 'sqlite3';
 const db = new sqlite3.Database('bot.db');
-import { Client, GatewayIntentBits } from 'discord.js';
+import { Client, Events, GatewayIntentBits, Collection } from 'discord.js';
 import { EmbedBuilder } from 'discord.js';
 
 import dotenv from 'dotenv';
 dotenv.config({ path: './.env' });
 
+//===============================================================================
+//Open Connections
+//===============================================================================
 
 const configuration = new Configuration({
     apiKey: process.env.OPENAI_API_KEY,
 });
 const openai = new OpenAIApi(configuration);
 
-
-//Discord.js requires that we declare our intents prior to obtaining API access.  These are necessary to obtain
-//various user/guild information and create bot messages in a channel.
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -29,24 +35,61 @@ const client = new Client({
 });
 
 client.login(process.env.DISCORD_BOT_TOKEN);
-const bot = new Eris(process.env.DISCORD_BOT_TOKEN);
+client.commands = new Collection();
 
+//===============================================================================
+//Validate Connections
+//===============================================================================
 
 bot.on("ready", () => { 
     console.log("Eris is connected and ready!"); 
 });
-
-client.on("ready", () => { 
-    console.log("Discord.js is connected and ready!"); 
-});
-
 bot.on("error", (err) => {
   console.error(err); 
 });
+client.once(Events.ClientReady, c => {
+	console.log(`Ready! Logged in as ${c.user.tag}`);
+});
 
-client.on("error", (err) => {
-    console.error(err); 
-  });
+//===============================================================================
+// Discord Specific Initializations
+//===============================================================================
+
+const commandsPath = path.join(path.dirname(fileURLToPath(import.meta.url)), 'commands');
+const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+
+for (const file of commandFiles) {
+	const filePath = path.join(commandsPath, file);
+	const command = await import(filePath);
+	// Set a new item in the Collection with the key as the command name and the value as the exported module
+	if ('data' in command && 'execute' in command) {
+		client.commands.set(command.data.name, command);
+	} else {
+		console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+	}
+}
+
+//===============================================================================
+// Event Handling
+//===============================================================================
+
+client.on(Events.InteractionCreate, async interaction => {
+    if (!interaction.isChatInputCommand()) return;
+
+    const command = interaction.client.commands.get(interaction.commandName);
+
+	if (!command) {
+		console.error(`No command matching ${interaction.commandName} was found.`);
+		return;
+	}
+
+    try {
+        await command.execute(interaction);
+    } catch (error) {
+        console.error(error);
+        await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+    }
+});
 
 
 bot.on("messageCreate", async (msg) => {

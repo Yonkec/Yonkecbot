@@ -62,9 +62,9 @@ export async function stableDiffuse(msg, client) {
                 cfg_scale: 20,
                 height: 512,
                 width: 512,
-                sampler: 'K_LMS',
+                sampler: 'DDIM',
                 samples: 1,
-                steps: 100,
+                steps: 70,
             })
         }
     );
