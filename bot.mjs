@@ -30,6 +30,7 @@ export const client = new Client({
 client.login(process.env.DISCORD_BOT_TOKEN);
 client.commands = new Collection();
 
+
 //===============================================================================
 //Validate Connections
 //===============================================================================
