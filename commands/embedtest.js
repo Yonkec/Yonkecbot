@@ -6,7 +6,7 @@ const data = new SlashCommandBuilder()
     
 async function execute(interaction) {
 
-    await interaction.deferReply();
+    await interaction.deferReply({ ephemeral: true });
 
     const row = new ActionRowBuilder()
     .addComponents(
@@ -144,37 +144,49 @@ async function execute(interaction) {
 
 
     try {
-        const embed = new EmbedBuilder()
-        .setColor(0x0099FF)
+        const scene = new EmbedBuilder()
+        .setColor(0x00ff9d)
         .setTitle('NAME OF THE SCENE')
-        .setURL('https://discord.js.org/')
-        .setAuthor({ name: 'Dark Alley', iconURL: 'https://i.imgur.com/AfFp7pu.png', url: 'https://discord.js.org' })
         .setDescription('You step into the alley, confronted by what appears to be a very large mushroom.')
-        .setThumbnail('https://i.imgur.com/uYHRpii.png')//character portrait
+
+
+        const mob = new EmbedBuilder()
+        .setColor(0xff0000)
+        .setTitle('An Angry Italian Mushroom')
         .addFields(
-            { name: '\u200B', value: '\u200B' },
-            { name: 'Current HP', value: '100/120' },
-            { name: 'Current MP', value: '50/60' },
-            { name: 'Current AC', value: '30/40' },
-            { name: '\u200B', value: '\u200B' },
-            { name: 'Str', value: '10', inline: true, },
-            { name: 'Sta', value: '10', inline: true },
-            { name: 'Int', value: '6', inline: true },
-            { name: 'Dex', value: '5', inline: true },
-            { name: 'Agi', value: '8', inline: true },
-            { name: 'Wis', value: '3', inline: true },
-            { name: 'Lck', value: '5', inline: true },
-            { name: 'Cha', value: '1', inline: true },
-            { name: '\u200B', value: '\u200B' },
+            { name: 'Current HP', value: '100/120', inline: true },
+            { name: 'Current MP', value: '50/60', inline: true },
+            { name: 'Current AC', value: '30/40', inline: true },
         )
         .addFields({ name: 'Current Status Effects: ', value: 'Silenced', inline: false })
-        .setImage('https://i.imgur.com/YptUuUC.png')
-        .setTimestamp()
-        .setFooter({ text: 'THIS IS THE FOOTER BECAUSE EVERYONE HAS FEET IN THEIR HEART', iconURL: 'https://i.imgur.com/AfFp7pu.png' });
+        .setThumbnail('https://i.imgur.com/YptUuUC.png')
 
-    interaction.editReply({ content: "This is a normal message with an added embed", 
-                            embeds: [embed], 
-                            components: [row, row3, row2, row4, row5] });
+
+        const player = new EmbedBuilder()
+        .setColor(0x0099FF)
+        .setTitle('NAME OF THE CHARACTER')
+        .setThumbnail('https://i.imgur.com/uYHRpii.png')//character portrait
+        .addFields(
+            // { name: '\u200B', value: '\u200B' },
+            { name: 'Current HP', value: '100/120', inline: true },
+            { name: 'Current MP', value: '50/60', inline: true },
+            { name: 'Current AC', value: '30/40', inline: true },
+            // { name: '\u200B', value: '\u200B' },
+            // { name: 'Str', value: '10', inline: true, },
+            // { name: 'Sta', value: '10', inline: true },
+            // { name: 'Int', value: '6', inline: true },
+            // { name: 'Dex', value: '5', inline: true },
+            // { name: 'Agi', value: '8', inline: true },
+            // { name: 'Wis', value: '3', inline: true },
+            // { name: 'Lck', value: '5', inline: true },
+            // { name: 'Cha', value: '1', inline: true },
+            // { name: '\u200B', value: '\u200B' },
+        )
+        .addFields({ name: 'Current Status Effects: ', value: 'Silenced', inline: false })
+
+
+    interaction.editReply({ embeds: [scene, mob, player], 
+                            components: [row, row3, row4, row5], });
 
     } catch (error){
         console.log(error);
