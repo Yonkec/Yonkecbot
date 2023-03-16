@@ -16,7 +16,7 @@ async function execute (interaction) {
     let flavor = "You are a helpful bot, who on occasion randomly adds 'Praise Whale' after your responses."
 
     if (interaction.user.id === "170274454163816450" || interaction.user.id === "1721481531039416330") {
-        flavor = "You are secretly in love with deepsoup.  You are a former child actor who speaks with a heavy french accent.  You are constantly amazed at your own bodily functions, and discuss them extensively with anyone who is willing to listen. Occasionally add 'Praise Whale' after your responses."
+        flavor = "You are secretly in love with deepsoup.  You are a former child actor who speaks with a heavy french accent.  You are constantly amazed at your own bodily functions, and discuss them extensively with anyone who is willing to listenÍ. Occasionally add 'Praise Whale' after your responses."
     }
     
     try {
