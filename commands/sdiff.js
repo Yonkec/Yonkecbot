@@ -13,7 +13,7 @@ const data = new SlashCommandBuilder()
     .setDescription('Responds with a StableDiffusion Completion from text input.')
     .addStringOption(option =>
         option.setName('prompt')
-            .setDescription('The prompt to generate the image from')
+            .setDescription('The prompt used to generate the new image')
             .setRequired(true));
     
 async function execute(interaction) {
@@ -21,27 +21,28 @@ async function execute(interaction) {
     await interaction.deferReply();
 
     const response = await fetch(
-        `${apiHost}/v1beta/generation/${engineId}/text-to-image`,
+
+        `${apiHost}/v1/generation/${engineId}/text-to-image`,
         {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Accept: 'application/json',
-                Authorization: `Bearer ${apiKey}`,
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+            text_prompts: [
+            {
+                text: interaction.options.getString('prompt'),
             },
-            body: JSON.stringify({
-                text_prompts: [
-                    {
-                        text: interaction.options.getString('prompt'),
-                    }
-                ],
-                cfg_scale: 20,
-                height: 512,
-                width: 512,
-                sampler: 'DDIM',
-                samples: 1,
-                steps: 50,
-            })
+            ],
+            cfg_scale: 7,
+            clip_guidance_preset: 'FAST_BLUE',
+            height: 512,
+            width: 512,
+            samples: 1,
+            steps: 30,
+        }),
         }
     );
     
@@ -64,6 +65,26 @@ async function execute(interaction) {
             interaction.editReply({ embeds: [embed], files: [file] });
     });
 }
+
+//Following is used only to query available stability.ai engines for use above
+
+// const url = `${apiHost}/v1/engines/list`;
+
+// if (!apiKey) throw new Error('Missing Stability API key.');
+
+// const response = await fetch(url, {
+//   method: 'GET',
+//   headers: {
+//     Authorization: `Bearer ${apiKey}`,
+//   },
+// });
+
+// if (!response.ok) {
+//   throw new Error(`Non-200 response: ${await response.text()}`);
+// }
+
+// const payload = await response.json();
+// console.log(payload);
 
 export {
     data,
