@@ -4,7 +4,10 @@ import fetch from 'node-fetch';
 import dotenv from 'dotenv';
 dotenv.config({ path: './.env' });
 
-const engineId = 'stable-diffusion-512-v2-1';
+//stable-diffusion-512-v2-1
+//stable-diffusion-xl-beta-v2-2-2
+//stable-diffusion-xl-1024-v1-0
+const engineId = 'stable-diffusion-xl-beta-v2-2-2';
 const apiHost = process.env.API_HOST ?? 'https://api.stability.ai'
 const apiKey = process.env.STABILITY_API_KEY
 
@@ -37,11 +40,11 @@ async function execute(interaction) {
             },
             ],
             cfg_scale: 7,
-            clip_guidance_preset: 'FAST_BLUE',
             height: 512,
             width: 512,
             samples: 1,
-            steps: 30,
+            steps: 40
+            //style_preset: "pixel-art"
         }),
         }
     );
@@ -66,7 +69,7 @@ async function execute(interaction) {
     });
 }
 
-//Following is used only to query available stability.ai engines for use above
+// Following is used only to query available stability.ai engines for use above
 
 // const url = `${apiHost}/v1/engines/list`;
 
