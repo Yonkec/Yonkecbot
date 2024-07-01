@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { Configuration, OpenAIApi } from 'openai';
 import sqlite3 from 'sqlite3';
@@ -47,16 +47,21 @@ const commandsPath = path.join(path.dirname(fileURLToPath(import.meta.url)), 'co
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
 commandFiles.forEach(async file => {
-	const filePath = path.join(commandsPath, file);
-	const command = await import(filePath);
-	// Set a new item in the Collection with the key as the command name and the value as the exported module
-	if ('data' in command && 'execute' in command) {
-		client.commands.set(command.data.name, command);
-	} else {
-		console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
-	}
-});
+    const filePath = path.join(commandsPath, file);
+    const fileURL = pathToFileURL(filePath);
 
+    try {
+        const command = await import(fileURL.href);
+        // Set a new item in the Collection with the key as the command name and the value as the exported module
+        if ('data' in command && 'execute' in command) {
+            client.commands.set(command.data.name, command);
+        } else {
+            console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+        }
+    } catch (error) {
+        console.error(`Error importing command ${file}:`, error);
+    }
+});
 //===============================================================================
 // Event Handling
 //===============================================================================
